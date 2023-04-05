@@ -31,6 +31,22 @@ void initialCanvas(int (&canvas)[CANVAS_SIZE][CANVAS_SIZE], int initValue = 1) {
     }
 }
 
+// Возвращает введенную пользователем цифру
+int getUserDigit() {
+    int input = 0;
+
+    // Пока не будет введено нормальное число, выполняем цикл
+    while (!(cin >> input)){
+        cout << "Error. Enter a number: ";
+        // Сбрасываем коматозное состояние cin
+        cin.clear();
+        // Очищаем поток ввода
+        fflush(stdin);
+    }
+
+    return input;
+}
+
 // Возвращает результат пользовательского ввода в виде диапазона { [lineMin] - [lineMax], [cellMin] - [cellMax] }
 void setRange(int (&range)[2][2]) {
     int userInput[2][2] = { 0 };
@@ -40,8 +56,7 @@ void setRange(int (&range)[2][2]) {
             while(true) {
                 cout << "Enter value (0 - " << (CANVAS_SIZE - 1) << ") ";
                 cout << "for the " << (j == 0 ? "line" : "cell") << " (point " << i << "): ";
-                int input;
-                cin >> input;
+                int input = getUserDigit();
 
                 if (input >= 0 && input < CANVAS_SIZE) {
                     userInput[i][j] = input;
@@ -60,7 +75,7 @@ void setRange(int (&range)[2][2]) {
 }
 
 // Возвращает матрицу canvas с обнуленным диапазоном заданным range
-void subtractionCanvas(int (&canvas)[CANVAS_SIZE][CANVAS_SIZE], const int (&range)[2][2]) {
+void burstBubbleOnCanvas(int (&canvas)[CANVAS_SIZE][CANVAS_SIZE], const int (&range)[2][2]) {
     for (size_t line = range[Range::LINE][Range::MIN_VALUE]; line <= range[Range::LINE][Range::MAX_VALUE]; ++line) {
         for (size_t cell = range[Range::CELL][Range::MIN_VALUE]; cell <= range[Range::CELL][Range::MAX_VALUE]; ++cell) {
             canvas[line][cell] = 0;
@@ -68,18 +83,35 @@ void subtractionCanvas(int (&canvas)[CANVAS_SIZE][CANVAS_SIZE], const int (&rang
     }
 }
 
+// Если в матрице присутствует хотя бы одна ячейка равная 1, возвращает true
+bool hasCanvasNotEmpty(const int (&canvas)[CANVAS_SIZE][CANVAS_SIZE]) {
+    for (const auto &line : canvas) {
+        for (int cell : line) {
+            if (cell == 1) return true;
+        }
+    }
+
+    return false;
+}
+
 int main() {
     int canvas[CANVAS_SIZE][CANVAS_SIZE] = { 0 };
-    int range[2][2] = { 0 };
-
     initialCanvas(canvas);
 
-    printInfo(canvas);
+    cout << "\n\t--------The game has begun!--------" << endl;
 
-    setRange(range);
+    while(hasCanvasNotEmpty(canvas)) {
+        int range[2][2] = { 0 };
 
-    subtractionCanvas(canvas, range);
+        printInfo(canvas);
 
-    printInfo(canvas);
+        setRange(range);
 
+        burstBubbleOnCanvas(canvas, range);
+
+        printInfo(canvas);
+    }
+
+    cout << "\t-------All bubbles are burst-------" << endl;
+    cout << "\t------------GAME OVER!-------------" << endl;
 }
